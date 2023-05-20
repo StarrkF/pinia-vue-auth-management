@@ -7,12 +7,18 @@ const router = createRouter({
         {
             path: '/login',
             name: 'login',
-            component: () => import('../components/Login.vue')
+            component: () => import('../components/Login.vue'),
+            meta: {
+                hideNavbar: true,
+               }
         },
         {
-            path: '/login',
-            name: 'login',
-            component: () => import('../components/Register.vue')
+            path: '/register',
+            name: 'register',
+            component: () => import('../components/Register.vue'),
+            meta: {
+                hideNavbar: true,
+               }
         },
         {
             path: '/',

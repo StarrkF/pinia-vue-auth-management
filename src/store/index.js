@@ -14,12 +14,20 @@ export const useAuthStore = defineStore("auth", {
   },
   actions: {
     async getUser() {
-      const response = await axios.get("/user", {
+      await axios.get("/user", {
         headers: {
           Authorization: "Bearer " + localStorage.getItem('accessToken')
         }
-      });
-      this.authUser = response.data;
+      })
+        .then((response) => {
+          this.authUser = response.data;
+        })
+        .catch((error) => {
+          if (error.response.status === 422) {
+            this.authErrors = error.response.data.errors;
+          }
+        })
+
     },
     async handleLogin(data) {
       this.authErrors = [];
@@ -35,26 +43,27 @@ export const useAuthStore = defineStore("auth", {
           }
         })
     },
-    // async handleRegister(data) {
-    //   this.authErrors = [];
-    //   await this.getToken();
-    //   try {
-    //     await axios.post("/register", {
-    //       name: data.name,
-    //       email: data.email,
-    //       password: data.password,
-    //       password_confirmation: data.password_confirmation,
-    //     });
-    //     this.router.push("/");
-    //   } catch (error) {
-    //     if (error.response.status === 422) {
-    //       this.authErrors = error.response.data.errors;
-    //     }
-    //   }
-    // },
+    async handleRegister(data) {
+      this.authErrors = [];
+
+      await axios.post("/register", data)
+        .then((response) => {
+          localStorage.setItem('accessToken', response.data.token)
+          this.router.push("/")
+        })
+        .catch((error) => {
+          if (error.response.status === 422) {
+            this.authErrors = error.response.data.errors;
+          }
+        })
+    },
     async handleLogout() {
-      await axios.post("/logout");
-      this.authUser = null;
+      await axios.post("/logout")
+        .then(() => {
+          localStorage.removeItem('accessToken');
+          this.router.push("/login")
+          this.authUser = null;
+        });
     },
   },
 });
